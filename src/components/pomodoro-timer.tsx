@@ -1,9 +1,10 @@
-import { useEffect, useState, type JSX } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState, useCallback, type JSX } from 'react';
 import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
 import { Timer } from './timer';
-
 import Sound from '../sounds/audio.mp3';
+import { secondsToTime } from '../utils/seconds-to-time';
 
 const audio = new Audio(Sound);
 
@@ -24,51 +25,87 @@ const playAudioForDuration = (durationInMs: number) => {
 };
 
 interface Props {
-  PomodoroTime: number;
-  ShortRestTime: number;
-  LongRestTime: number;
-  Cycles: number;
+  pomodoroTime: number;
+  shortRestTime: number;
+  longRestTime: number;
+  cycles: number;
 }
 
 export function PomodoroTimer(props: Props): JSX.Element {
-  const [mainTime, setMainTime] = useState(props.PomodoroTime);
+  const [mainTime, setMainTime] = useState(props.pomodoroTime);
   const [timeCounting, setTimeCouting] = useState(false);
   const [working, setWorking] = useState(false);
   const [resting, setResting] = useState(false);
+  const [cyclesQtdManager, setCyclesQtdManager] = useState(
+    new Array(props.cycles - 1).fill(true)
+  );
 
-  useEffect(() => {
-    if (working) document.body.classList.add('working');
-    if (resting) document.body.classList.remove('working');
-  }, [working, resting]);
+  const [completedCycles, setCompletedCycles] = useState(0);
+  const [fullWorkingTime, setFullWorkingTime] = useState(0);
+  const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
   useInterval(
     () => {
       setMainTime(mainTime - 1);
+      if (working) setFullWorkingTime(fullWorkingTime + 1);
     },
     timeCounting ? 1000 : null
   );
 
-  const configureWork = () => {
+  const configureWork = useCallback(() => {
     setTimeCouting(true);
     setWorking(true);
     setResting(false);
-    setMainTime(props.PomodoroTime);
+    setMainTime(props.pomodoroTime);
     playAudioForDuration(5800);
-  };
+  }, [props.pomodoroTime]);
 
-  const configureRest = (Long: boolean) => {
-    setTimeCouting(true);
-    setWorking(false);
-    setResting(true);
+  const configureRest = useCallback(
+    (Long: boolean) => {
+      setTimeCouting(true);
+      setWorking(false);
+      setResting(true);
 
-    if (Long) {
-      setMainTime(props.LongRestTime);
-    } else {
-      setMainTime(props.ShortRestTime);
+      if (Long) {
+        setMainTime(props.longRestTime);
+      } else {
+        setMainTime(props.shortRestTime);
+      }
+
+      playAudioForDuration(5800);
+    },
+    [props.longRestTime, props.shortRestTime]
+  );
+
+  useEffect(() => {
+    if (working) document.body.classList.add('working');
+    if (resting) document.body.classList.remove('working');
+
+    if (mainTime > 0) return;
+
+    if (working && cyclesQtdManager.length > 0) {
+      configureRest(false);
+      setCyclesQtdManager((prev) => prev.slice(0, -1));
+    } else if (working && cyclesQtdManager.length <= 0) {
+      configureRest(true);
+      setCyclesQtdManager(new Array(props.cycles - 1).fill(true));
+      setCompletedCycles(completedCycles + 1);
     }
 
-    playAudioForDuration(5800);
-  };
+    if (working) setNumberOfPomodoros(numberOfPomodoros + 1);
+    if (resting) configureWork();
+  }, [
+    working,
+    resting,
+    mainTime,
+    cyclesQtdManager,
+    numberOfPomodoros,
+    completedCycles,
+    configureRest,
+    setCyclesQtdManager,
+    configureWork,
+    props.cycles,
+  ]);
 
   return (
     <div className="pomodoro">
@@ -84,11 +121,9 @@ export function PomodoroTimer(props: Props): JSX.Element {
         ></Button>
       </div>
       <div className="details">
-        <p>Testando: asdjiadijoadjasio adoasjokpdaokpjdao</p>
-        <p>Testando: asdjiadijoadjasio adoasjokpdaokpjdao</p>
-        <p>Testando: asdjiadijoadjasio adoasjokpdaokpjdao</p>
-        <p>Testando: asdjiadijoadjasio adoasjokpdaokpjdao</p>
-        <p>Testando: asdjiadijoadjasio adoasjokpdaokpjdao</p>
+        <p>Ciclos concluídos: {completedCycles}</p>
+        <p>Horas trabalhadas: {secondsToTime(fullWorkingTime)}</p>
+        <p>Pomodoros concluídos: {numberOfPomodoros}</p>
       </div>
     </div>
   );

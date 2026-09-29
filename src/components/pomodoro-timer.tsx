@@ -3,6 +3,26 @@ import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
 import { Timer } from './timer';
 
+import Sound from '../sounds/audio.mp3';
+
+const audio = new Audio(Sound);
+
+let audioTimeout: number | undefined;
+
+const playAudioForDuration = (durationInMs: number) => {
+  if (audioTimeout) clearTimeout(audioTimeout);
+
+  audio.pause();
+  audio.currentTime = 0;
+
+  audio.play().catch(() => {});
+
+  audioTimeout = window.setTimeout(() => {
+    audio.pause();
+    audio.currentTime = 0;
+  }, durationInMs);
+};
+
 interface Props {
   PomodoroTime: number;
   ShortRestTime: number;
@@ -33,7 +53,9 @@ export function PomodoroTimer(props: Props): JSX.Element {
     setWorking(true);
     setResting(false);
     setMainTime(props.PomodoroTime);
+    playAudioForDuration(5800);
   };
+
   const configureRest = (Long: boolean) => {
     setTimeCouting(true);
     setWorking(false);
@@ -44,11 +66,13 @@ export function PomodoroTimer(props: Props): JSX.Element {
     } else {
       setMainTime(props.ShortRestTime);
     }
+
+    playAudioForDuration(5800);
   };
 
   return (
     <div className="pomodoro">
-      <h2>You are: Working</h2>
+      <h2>You are: {working ? 'Working' : 'Resting'}</h2>
       <Timer mainTime={mainTime} />
       <div className="controls">
         <Button text="Work" onClick={() => configureWork()}></Button>

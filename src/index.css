@@ -162,4 +162,79 @@ body {
   background: rgb( 0 0 0 / 10%);
 }
 
+.settings-toast {
+  background: #fff !important;
+  color: #333 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 25px rgb(0 0 0 / 15%) !important;
+  font-family: sans-serif;
+  width: 360px !important;
+}
+
+.settings-toast.toast-pomodoro {
+  border-left: 5px solid #ef5d50;
+}
+
+.settings-toast.toast-short-rest {
+  border-left: 5px solid #41e1ba;
+}
+
+.settings-toast.toast-long-rest {
+  border-left: 5px solid #2563EB;
+}
+
+.settings-toast.toast-cycles {
+  border-left: 5px solid #2563EB;
+}
+
+.settings-toast.toast-cycles .Toastify__progress-bar, .settings-toast.toast-long-rest .Toastify__progress-bar {
+  background: #2563EB !important;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+}
+
+.settings-toast.toast-pomodoro .Toastify__progress-bar{
+  background: #ef5d50;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+}
+
+.settings-toast.toast-short-rest .Toastify__progress-bar {
+  background: #41e1ba;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+}
+
+
+
+.toast-message {
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+  gap: 10px;
+}
+
+.toast-message-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.toast-message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toast-message-content strong {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.toast-message-content span {
+  white-space: nowrap;
+  font-size: 14px;
+  color: #666;
+}
+
+
 

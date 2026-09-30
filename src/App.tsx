@@ -2,6 +2,7 @@ import { useState, type JSX } from 'react';
 import { PomodoroTimer } from './components/pomodoro-timer.tsx';
 import './index.css';
 import { Settings } from './components/settings.tsx';
+import { ToastContainer } from 'react-toastify';
 
 function App(): JSX.Element {
   const [pomodoroTime, setPomodoroTime] = useState(10);
@@ -10,6 +11,7 @@ function App(): JSX.Element {
   const [cycles, setCycles] = useState(4);
   return (
     <div className="container">
+      <ToastContainer />
       <div className="pomodoro-wrapper">
         <Settings
           pomodoroTime={pomodoroTime}

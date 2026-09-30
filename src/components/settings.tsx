@@ -1,6 +1,7 @@
-import { useState, type JSX } from 'react';
+import { useRef, useState, type JSX } from 'react';
 import { SettingsInput } from './settings-input';
 import { FiSettings, FiX } from 'react-icons/fi';
+import { toast } from 'react-toastify';
 
 interface Props {
   pomodoroTime: number;
@@ -11,6 +12,32 @@ interface Props {
   setLongRestTime: (value: number) => void;
   cycles: number;
   setCycles: (value: number) => void;
+}
+
+interface ToastMessageProps {
+  icon: string;
+  title: string;
+  message: string;
+}
+
+type ToastType =
+  'toast-pomodoro' | 'toast-short-rest' | 'toast-long-rest' | 'toast-cycles';
+
+function ToastMessage({
+  icon,
+  title,
+  message,
+}: ToastMessageProps): JSX.Element {
+  return (
+    <div className="toast-message">
+      <span className="toast-message-icon">{icon}</span>
+
+      <div className="toast-message-content">
+        <strong>{title}</strong>
+        <span>{message}</span>
+      </div>
+    </div>
+  );
 }
 
 export function Settings(props: Props): JSX.Element {
@@ -25,6 +52,22 @@ export function Settings(props: Props): JSX.Element {
   );
   const [cyclesInput, setCyclesInput] = useState(String(props.cycles));
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const confirmedByEnter = useRef(false);
+
+  function showUpdateToast(
+    icon: string,
+    title: string,
+    message: string,
+    type: ToastType
+  ): void {
+    toast.success(
+      <ToastMessage icon={icon} title={title} message={message} />,
+      {
+        className: `settings-toast ${type}`,
+        icon: false,
+      }
+    );
+  }
 
   function confirmValue(
     input: string,
@@ -52,18 +95,24 @@ export function Settings(props: Props): JSX.Element {
     setValue: (value: number) => void,
     setInput: (value: string) => void,
     currentValue: number
-  ): void {
+  ): number | null {
     const confirmed = confirmValue(input, min, max, setValue);
 
     if (confirmed !== null) {
       setInput(String(confirmed));
-    } else {
-      setInput(String(currentValue));
+
+      if (confirmed !== currentValue) {
+        return confirmed;
+      }
+      return null;
     }
+
+    setInput(String(currentValue));
+    return null;
   }
 
   function confirmPomodoroTime(): void {
-    confirmInput(
+    const confirmed = confirmInput(
       pomodoroInput,
       1,
       120,
@@ -71,10 +120,19 @@ export function Settings(props: Props): JSX.Element {
       setPomodoroInput,
       props.pomodoroTime
     );
+
+    if (confirmed !== null) {
+      showUpdateToast(
+        '🍅',
+        'Pomodoro atualizado',
+        `Seu tempo de trabalho agora é ${confirmed} minutos`,
+        'toast-pomodoro'
+      );
+    }
   }
 
   function confirmShortRestTime(): void {
-    confirmInput(
+    const confirmed = confirmInput(
       shortRestInput,
       1,
       60,
@@ -82,10 +140,19 @@ export function Settings(props: Props): JSX.Element {
       setShortRestInput,
       props.shortRestTime
     );
+
+    if (confirmed !== null) {
+      showUpdateToast(
+        '☕',
+        'Descanso curto atualizado',
+        `Seu descanso agora é ${confirmed} minutos`,
+        'toast-short-rest'
+      );
+    }
   }
 
   function confirmLongRestTime(): void {
-    confirmInput(
+    const confirmed = confirmInput(
       longRestInput,
       1,
       60,
@@ -93,10 +160,19 @@ export function Settings(props: Props): JSX.Element {
       setLongRestInput,
       props.longRestTime
     );
+
+    if (confirmed !== null) {
+      showUpdateToast(
+        '🌙',
+        'Descanso longo atualizado',
+        `Seu descanso agora é ${confirmed} minutos`,
+        'toast-long-rest'
+      );
+    }
   }
 
   function confirmCycles(): void {
-    confirmInput(
+    const confirmed = confirmInput(
       cyclesInput,
       1,
       20,
@@ -104,6 +180,15 @@ export function Settings(props: Props): JSX.Element {
       setCyclesInput,
       props.cycles
     );
+
+    if (confirmed !== null) {
+      showUpdateToast(
+        '🔄',
+        'Ciclos atualizados',
+        `Você configurou ${confirmed} ciclos`,
+        'toast-cycles'
+      );
+    }
   }
 
   return (
@@ -138,10 +223,18 @@ export function Settings(props: Props): JSX.Element {
                 onChange={(e) => setPomodoroInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    confirmedByEnter.current = true;
                     confirmPomodoroTime();
                   }
                 }}
-                onBlur={confirmPomodoroTime}
+                onBlur={() => {
+                  if (confirmedByEnter.current) {
+                    confirmedByEnter.current = false;
+                    return;
+                  }
+
+                  confirmPomodoroTime();
+                }}
               />
               <SettingsInput
                 label="Descanso curto: "
@@ -151,10 +244,18 @@ export function Settings(props: Props): JSX.Element {
                 onChange={(e) => setShortRestInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    confirmedByEnter.current = true;
                     confirmShortRestTime();
                   }
                 }}
-                onBlur={confirmShortRestTime}
+                onBlur={() => {
+                  if (confirmedByEnter.current) {
+                    confirmedByEnter.current = false;
+                    return;
+                  }
+
+                  confirmShortRestTime();
+                }}
               />
               <SettingsInput
                 label="Descanso Longo: "
@@ -164,10 +265,17 @@ export function Settings(props: Props): JSX.Element {
                 onChange={(e) => setLongRestInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    confirmedByEnter.current = true;
                     confirmLongRestTime();
                   }
                 }}
-                onBlur={confirmLongRestTime}
+                onBlur={() => {
+                  if (confirmedByEnter.current) {
+                    confirmedByEnter.current = false;
+                    return;
+                  }
+                  confirmLongRestTime();
+                }}
               />
               <SettingsInput
                 label="Ciclos: "
@@ -177,10 +285,18 @@ export function Settings(props: Props): JSX.Element {
                 onChange={(e) => setCyclesInput(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
+                    confirmedByEnter.current = true;
                     confirmCycles();
                   }
                 }}
-                onBlur={confirmCycles}
+                onBlur={() => {
+                  if (confirmedByEnter.current) {
+                    confirmedByEnter.current = false;
+                    return;
+                  }
+
+                  confirmCycles();
+                }}
               />
             </div>
           </section>

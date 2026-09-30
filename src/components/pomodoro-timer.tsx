@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState, useCallback, type JSX } from 'react';
 import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
@@ -44,14 +43,6 @@ export function PomodoroTimer(props: Props): JSX.Element {
   const [fullWorkingTime, setFullWorkingTime] = useState(0);
   const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
-  useInterval(
-    () => {
-      setMainTime(mainTime - 1);
-      if (working) setFullWorkingTime(fullWorkingTime + 1);
-    },
-    timeCounting ? 1000 : null
-  );
-
   const configureWork = useCallback(() => {
     setTimeCouting(true);
     setWorking(true);
@@ -76,36 +67,37 @@ export function PomodoroTimer(props: Props): JSX.Element {
     },
     [props.longRestTime, props.shortRestTime]
   );
-
+  // Efeito restrio somente à manipulação do DOM
   useEffect(() => {
     if (working) document.body.classList.add('working');
     if (resting) document.body.classList.remove('working');
+  }, [working, resting]);
 
-    if (mainTime > 0) return;
-
-    if (working && cyclesQtdManager.length > 0) {
-      configureRest(false);
-      setCyclesQtdManager((prev) => prev.slice(0, -1));
-    } else if (working && cyclesQtdManager.length <= 0) {
-      configureRest(true);
-      setCyclesQtdManager(new Array(props.cycles - 1).fill(true));
-      setCompletedCycles(completedCycles + 1);
-    }
-
-    if (working) setNumberOfPomodoros(numberOfPomodoros + 1);
-    if (resting) configureWork();
-  }, [
-    working,
-    resting,
-    mainTime,
-    cyclesQtdManager,
-    numberOfPomodoros,
-    completedCycles,
-    configureRest,
-    setCyclesQtdManager,
-    configureWork,
-    props.cycles,
-  ]);
+  // Lógica de contagem e transição de ciclos centralizada no intervalo
+  useInterval(
+    () => {
+      // Se o tempo ainda for maior que zero, apenas subtrai 1
+      if (mainTime > 0) {
+        setMainTime(mainTime - 1);
+        if (working) setFullWorkingTime(fullWorkingTime + 1);
+        return;
+      }
+      // Quando o relogio chega a 0, trata-se a transição diretamente aqui:
+      if (working && cyclesQtdManager.length > 0) {
+        configureRest(false);
+        setCyclesQtdManager((prev) => prev.slice(0, -1));
+        setNumberOfPomodoros((prev) => prev + 1);
+      } else if (working && cyclesQtdManager.length <= 0) {
+        configureRest(true);
+        setCyclesQtdManager(new Array(props.cycles - 1).fill(true));
+        setCompletedCycles((prev) => prev + 1);
+        setNumberOfPomodoros((prev) => prev + 1);
+      } else if (resting) {
+        configureWork();
+      }
+    },
+    timeCounting ? 1000 : null
+  );
 
   return (
     <div className="pomodoro">
@@ -121,8 +113,8 @@ export function PomodoroTimer(props: Props): JSX.Element {
         ></Button>
       </div>
       <div className="details">
-        <p>Ciclos concluídos: {completedCycles}</p>
         <p>Horas trabalhadas: {secondsToTime(fullWorkingTime)}</p>
+        <p>Ciclos concluídos: {completedCycles}</p>
         <p>Pomodoros concluídos: {numberOfPomodoros}</p>
       </div>
     </div>

@@ -67,3 +67,99 @@ body {
   margin: 20px 0;
 }
 
+.pomodoro-wrapper {
+  position: relative;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.settings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  width: 400px;
+  padding: 30px;
+
+  background: white;
+  border-radius: 12px;
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgb(0 0 0 / 50%);
+}
+
+.settings-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px
+}
+
+.settings-input {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-input-field {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+.settings-input-label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.settings-title {
+  margin: 0 0 24px;
+  font-size: 24px
+}
+
+.settings-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.settings-close:hover{
+  background: #eee;
+}
+
+.settings-open {
+  position: absolute;
+  top: 10px;
+  left: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px;
+
+  border: none;
+  border-radius: 50%;
+
+  background: transparent;
+  cursor: pointer;
+}
+
+.settings-open:hover {
+  background: rgb( 0 0 0 / 10%);
+}
+
+

@@ -5,9 +5,9 @@ import { Settings } from './components/settings.tsx';
 import { ToastContainer } from 'react-toastify';
 
 function App(): JSX.Element {
-  const [pomodoroTime, setPomodoroTime] = useState(10);
-  const [shortRestTime, setShortRestTime] = useState(3);
-  const [longRestTime, setLongRestTime] = useState(5);
+  const [pomodoroTime, setPomodoroTime] = useState(60);
+  const [shortRestTime, setShortRestTime] = useState(5);
+  const [longRestTime, setLongRestTime] = useState(15);
   const [cycles, setCycles] = useState(4);
   return (
     <div className="container">

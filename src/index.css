@@ -187,6 +187,16 @@ body {
   border-left: 5px solid #2563EB;
 }
 
+.settings-toast.toast-settings {
+  border-left: 5px solid #8b5cf6;
+}
+
+.settings-toast.toast-settings .Toastify__progress-bar {
+  background: #8b5cf6;
+  height: 3px;
+  border-radius: 0 0 12px 12px;
+}
+
 .settings-toast.toast-cycles .Toastify__progress-bar, .settings-toast.toast-long-rest .Toastify__progress-bar {
   background: #2563EB !important;
   height: 3px;
@@ -205,6 +215,23 @@ body {
   border-radius: 0 0 12px 12px;
 }
 
+.settings-apply {
+  display: block;
+  margin: 24px auto 0;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 6px;
+  background: #41e1ba;
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 300ms ease-in-out;
+}
+
+.settings-apply:hover {
+  background: #2fcfa8;
+}
 
 
 .toast-message {

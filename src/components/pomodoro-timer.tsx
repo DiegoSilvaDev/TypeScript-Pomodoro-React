@@ -31,7 +31,7 @@ interface Props {
 }
 
 export function PomodoroTimer(props: Props): JSX.Element {
-  const [mainTime, setMainTime] = useState(props.pomodoroTime);
+  const [mainTime, setMainTime] = useState(props.pomodoroTime * 60);
   const [timeCounting, setTimeCouting] = useState(false);
   const [working, setWorking] = useState(false);
   const [resting, setResting] = useState(false);
@@ -47,7 +47,7 @@ export function PomodoroTimer(props: Props): JSX.Element {
     setTimeCouting(true);
     setWorking(true);
     setResting(false);
-    setMainTime(props.pomodoroTime);
+    setMainTime(props.pomodoroTime * 60);
     playAudioForDuration(5800);
   }, [props.pomodoroTime]);
 
@@ -58,9 +58,9 @@ export function PomodoroTimer(props: Props): JSX.Element {
       setResting(true);
 
       if (Long) {
-        setMainTime(props.longRestTime);
+        setMainTime(props.longRestTime * 60);
       } else {
-        setMainTime(props.shortRestTime);
+        setMainTime(props.shortRestTime * 60);
       }
 
       playAudioForDuration(5800);

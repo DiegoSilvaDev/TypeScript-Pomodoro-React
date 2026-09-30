@@ -21,7 +21,11 @@ interface ToastMessageProps {
 }
 
 type ToastType =
-  'toast-pomodoro' | 'toast-short-rest' | 'toast-long-rest' | 'toast-cycles';
+  | 'toast-pomodoro'
+  | 'toast-short-rest'
+  | 'toast-long-rest'
+  | 'toast-cycles'
+  | 'toast-settings';
 
 function ToastMessage({
   icon,
@@ -72,8 +76,7 @@ export function Settings(props: Props): JSX.Element {
   function confirmValue(
     input: string,
     min: number,
-    max: number,
-    setValue: (value: number) => void
+    max: number
   ): number | null {
     const value = Number(input);
 
@@ -82,7 +85,6 @@ export function Settings(props: Props): JSX.Element {
     }
 
     if (value >= min && value <= max) {
-      setValue(value);
       return value;
     }
 
@@ -92,103 +94,155 @@ export function Settings(props: Props): JSX.Element {
     input: string,
     min: number,
     max: number,
-    setValue: (value: number) => void,
     setInput: (value: string) => void,
     currentValue: number
   ): number | null {
-    const confirmed = confirmValue(input, min, max, setValue);
+    const confirmed = confirmValue(input, min, max);
 
     if (confirmed !== null) {
       setInput(String(confirmed));
-
-      if (confirmed !== currentValue) {
-        return confirmed;
-      }
-      return null;
+      return confirmed;
     }
 
     setInput(String(currentValue));
     return null;
   }
 
-  function confirmPomodoroTime(): void {
-    const confirmed = confirmInput(
+  function applySettings(): void {
+    const pomodoro = confirmPomodoroTime();
+    const shortRest = confirmShortRestTime();
+    const longRest = confirmLongRestTime();
+    const cycles = confirmCycles();
+
+    if (
+      pomodoro === null ||
+      shortRest === null ||
+      longRest === null ||
+      cycles === null
+    ) {
+      return;
+    }
+
+    const changes: string[] = [];
+
+    if (pomodoro !== props.pomodoroTime) {
+      changes.push('Pomodoro');
+    }
+    if (shortRest !== props.shortRestTime) {
+      changes.push(`Descanso curto`);
+    }
+    if (longRest !== props.longRestTime) {
+      changes.push(`Descanso longo`);
+    }
+    if (cycles !== props.cycles) {
+      changes.push(`Ciclos`);
+    }
+
+    if (changes.length === 0) {
+      setIsSettingsOpen(false);
+      return;
+    }
+
+    if (pomodoro !== props.pomodoroTime) {
+      props.setPomodoroTime(pomodoro);
+
+      if (changes.length === 1) {
+        showUpdateToast(
+          '🍅',
+          'Pomodoro atualizado',
+          `Seu tempo de trabalho agora é ${pomodoro} minutos`,
+          'toast-pomodoro'
+        );
+      }
+    }
+
+    if (shortRest !== props.shortRestTime) {
+      props.setShortRestTime(shortRest);
+
+      if (changes.length === 1) {
+        showUpdateToast(
+          '☕',
+          'Descanso curto atualizado',
+          `Seu descanso agora é ${shortRest} minutos`,
+          'toast-short-rest'
+        );
+      }
+    }
+
+    if (longRest !== props.longRestTime) {
+      props.setLongRestTime(longRest);
+      if (changes.length === 1) {
+        showUpdateToast(
+          '🌙',
+          'Descanso longo atualizado',
+          `Seu descanso agora é ${longRest} minutos`,
+          'toast-long-rest'
+        );
+      }
+    }
+
+    if (cycles !== props.cycles) {
+      props.setCycles(cycles);
+
+      if (changes.length === 1) {
+        showUpdateToast(
+          '🔄',
+          'Ciclos atualizados',
+          `Você configurou ${cycles} ciclos`,
+          'toast-cycles'
+        );
+      }
+    }
+
+    if (changes.length > 1) {
+      const message =
+        changes.length <= 2
+          ? `${changes.join(' e ')} alterados.`
+          : `${changes.length} configurações foram alteradas`;
+
+      showUpdateToast(
+        '⚙️',
+        'Configurações atualizadas',
+        message,
+        'toast-settings'
+      );
+    }
+
+    setIsSettingsOpen(false);
+  }
+
+  function confirmPomodoroTime(): number | null {
+    return confirmInput(
       pomodoroInput,
       1,
       120,
-      props.setPomodoroTime,
       setPomodoroInput,
       props.pomodoroTime
     );
-
-    if (confirmed !== null) {
-      showUpdateToast(
-        '🍅',
-        'Pomodoro atualizado',
-        `Seu tempo de trabalho agora é ${confirmed} minutos`,
-        'toast-pomodoro'
-      );
-    }
   }
 
-  function confirmShortRestTime(): void {
-    const confirmed = confirmInput(
+  function confirmShortRestTime(): number | null {
+    return confirmInput(
       shortRestInput,
       1,
       60,
-      props.setShortRestTime,
       setShortRestInput,
       props.shortRestTime
     );
-
-    if (confirmed !== null) {
-      showUpdateToast(
-        '☕',
-        'Descanso curto atualizado',
-        `Seu descanso agora é ${confirmed} minutos`,
-        'toast-short-rest'
-      );
-    }
   }
 
-  function confirmLongRestTime(): void {
-    const confirmed = confirmInput(
+  function confirmLongRestTime(): number | null {
+    return confirmInput(
       longRestInput,
       1,
       60,
-      props.setLongRestTime,
       setLongRestInput,
       props.longRestTime
     );
-
-    if (confirmed !== null) {
-      showUpdateToast(
-        '🌙',
-        'Descanso longo atualizado',
-        `Seu descanso agora é ${confirmed} minutos`,
-        'toast-long-rest'
-      );
-    }
   }
 
-  function confirmCycles(): void {
-    const confirmed = confirmInput(
-      cyclesInput,
-      1,
-      20,
-      props.setCycles,
-      setCyclesInput,
-      props.cycles
-    );
-
-    if (confirmed !== null) {
-      showUpdateToast(
-        '🔄',
-        'Ciclos atualizados',
-        `Você configurou ${confirmed} ciclos`,
-        'toast-cycles'
-      );
-    }
+  function confirmCycles(): number | null {
+    return confirmInput(cyclesInput, 1, 20, setCyclesInput, props.cycles);
   }
 
   return (
@@ -258,7 +312,7 @@ export function Settings(props: Props): JSX.Element {
                 }}
               />
               <SettingsInput
-                label="Descanso Longo: "
+                label="Descanso longo: "
                 value={longRestInput}
                 min={1}
                 max={60}
@@ -299,6 +353,13 @@ export function Settings(props: Props): JSX.Element {
                 }}
               />
             </div>
+            <button
+              className="settings-apply"
+              type="button"
+              onClick={applySettings}
+            >
+              Aplicar alterações
+            </button>
           </section>
         </div>
       )}

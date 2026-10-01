@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback, type JSX } from 'react';
 import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
 import { Timer } from './timer';
+import { showBrowserNotification } from '../utils/show-browser-notification';
+import { requestNotificationPermission } from '../utils/request-permission';
 import Sound from '../sounds/audio.mp3';
 import { secondsToTime } from '../utils/seconds-to-time';
 
@@ -33,8 +35,9 @@ interface Props {
 export function PomodoroTimer(props: Props): JSX.Element {
   const [mainTime, setMainTime] = useState(props.pomodoroTime * 60);
   const [timeCounting, setTimeCouting] = useState(false);
-  const [working, setWorking] = useState(false);
+  const [working, setWorking] = useState(true);
   const [resting, setResting] = useState(false);
+  const [started, setStarted] = useState(false);
   const [cyclesQtdManager, setCyclesQtdManager] = useState(
     new Array(props.cycles - 1).fill(true)
   );
@@ -43,8 +46,7 @@ export function PomodoroTimer(props: Props): JSX.Element {
   const [fullWorkingTime, setFullWorkingTime] = useState(0);
   const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
-  const displayedTime =
-    !working && !resting ? props.pomodoroTime * 60 : mainTime;
+  const displayedTime = !started ? props.pomodoroTime * 60 : mainTime;
 
   const configureWork = useCallback(() => {
     setTimeCouting(true);
@@ -87,15 +89,27 @@ export function PomodoroTimer(props: Props): JSX.Element {
       }
       // Quando o relogio chega a 0, trata-se a transição diretamente aqui:
       if (working && cyclesQtdManager.length > 0) {
+        showBrowserNotification(
+          'Pomodoro concluído',
+          'Está na hora de fazer um pequeno descanso!'
+        );
         configureRest(false);
         setCyclesQtdManager((prev) => prev.slice(0, -1));
         setNumberOfPomodoros((prev) => prev + 1);
       } else if (working && cyclesQtdManager.length <= 0) {
+        showBrowserNotification(
+          'Ciclo concluído',
+          'Está na hora de fazer um descanso longo!'
+        );
         configureRest(true);
         setCyclesQtdManager(new Array(props.cycles - 1).fill(true));
         setCompletedCycles((prev) => prev + 1);
         setNumberOfPomodoros((prev) => prev + 1);
       } else if (resting) {
+        showBrowserNotification(
+          'Descanso Concluído',
+          'Hora de voltar ao trabalho!'
+        );
         configureWork();
       }
     },
@@ -107,13 +121,26 @@ export function PomodoroTimer(props: Props): JSX.Element {
       <h2>You are: {working ? 'Working' : 'Resting'}</h2>
       <Timer mainTime={displayedTime} />
       <div className="controls">
-        <Button text="Work" onClick={() => configureWork()}></Button>
-        <Button text="Rest" onClick={() => configureRest(false)}></Button>
-        <Button
-          className={!working && !resting ? 'hidden' : ''}
-          text={timeCounting ? 'Pause' : 'Play'}
-          onClick={() => setTimeCouting(!timeCounting)}
-        ></Button>
+        {!started ? (
+          <Button
+            text="Start"
+            onClick={() => {
+              requestNotificationPermission();
+              setStarted(true);
+              configureWork();
+            }}
+          />
+        ) : (
+          <>
+            <Button text="Work" onClick={() => configureWork()}></Button>
+            <Button text="Rest" onClick={() => configureRest(false)}></Button>
+            <Button
+              className="timer-control"
+              text={timeCounting ? 'Pause' : 'Play'}
+              onClick={() => setTimeCouting(!timeCounting)}
+            ></Button>
+          </>
+        )}
       </div>
       <div className="details">
         <p>Horas trabalhadas: {secondsToTime(fullWorkingTime)}</p>

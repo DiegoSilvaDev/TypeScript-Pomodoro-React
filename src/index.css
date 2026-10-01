@@ -46,18 +46,32 @@ body {
 .pomodoro .controls {
   display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
+  padding: 0 60px;
 }
 
 .pomodoro button {
+  width: 90px;
   background: #41e1ba;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
   padding: 10px 25px;
+  font-weight: 700;
+  box-shadow: 0 4px 0 rgb(0 0 0 / 10%);
   color: #000;
-  transition: background-color 300ms ease-in-out;
+  transition:
+  background-color 300ms ease-in-out,
+  color 300ms ease-in-out,
+  box-shadow 100ms ease-in-out;
   margin: 20px auto;
 }
+
+.pomodoro button:active {
+  transform: translateY(0.5px);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 10%);
+}
+
 .working .pomodoro button {
   background: #EF5D50;
   color: #fff;

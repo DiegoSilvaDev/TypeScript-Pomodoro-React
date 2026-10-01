@@ -9,6 +9,7 @@ function App(): JSX.Element {
   const [shortRestTime, setShortRestTime] = useState(5);
   const [longRestTime, setLongRestTime] = useState(15);
   const [cycles, setCycles] = useState(4);
+
   return (
     <div className="container">
       <ToastContainer />

@@ -39,7 +39,8 @@ body {
 }
 
 .pomodoro .timer {
-  font-size: 6rem;
+  font-size: 8rem;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -233,15 +234,34 @@ body {
 .settings-apply {
   display: block;
   margin: 24px auto 0;
-  padding: 10px 24px;
+  padding: 10px 25px;
   border: none;
-  border-radius: 6px;
-  background: #41e1ba;
-  color: #000;
+  border-radius: 4px;
   font-size: 16px;
+  color: #fff;
+  background: #ef5d50;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 300ms ease-in-out;
+  box-shadow: 0 4px 0 rgb(0 0 0 / 10%);
+  transition:
+    background-color 300ms ease-in-out,
+    color 300ms ease-in-out,
+    box-shadow 100ms ease-in-out;
+}
+
+.settings-apply-working {
+  background: #ef5d50;
+  color: #fff;
+}
+
+.settings-apply-resting {
+  background: #41e1ba;
+  color:#000
+}
+
+.settings-apply:active {
+  transform: translateY(0.5px);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 10%);
 }
 
 .settings-input-error-container {
@@ -269,9 +289,6 @@ body {
   box-shadow: 0 0 0 2px rgb(239 93 80 / 10%);
 }
 
-.settings-apply:hover {
-  background: #2fcfa8;
-}
 
 
 .toast-message {

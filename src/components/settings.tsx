@@ -5,6 +5,7 @@ import { toast } from 'react-toastify';
 import { ToastMessage, type ToastType } from './toast-message';
 import { confirmInput } from '../utils/confirm-input';
 import type { Setting } from '../types/setting';
+import { Button } from './button';
 
 interface Props {
   pomodoroTime: number;
@@ -15,6 +16,7 @@ interface Props {
   setLongRestTime: (value: number) => void;
   cycles: number;
   setCycles: (value: number) => void;
+  working: boolean;
 }
 
 export function Settings(props: Props): JSX.Element {
@@ -240,13 +242,15 @@ export function Settings(props: Props): JSX.Element {
                 onConfirm={confirmSettings}
               />
             </div>
-            <button
-              className="settings-apply"
-              type="button"
+            <Button
+              className={`settings-apply ${
+                props.working
+                  ? 'settings-apply-working'
+                  : 'settings-apply-resting'
+              }`}
+              text="Aplicar alterações"
               onClick={applySettings}
-            >
-              Aplicar alterações
-            </button>
+            ></Button>
           </section>
         </div>
       )}

@@ -9,6 +9,7 @@ function App(): JSX.Element {
   const [shortRestTime, setShortRestTime] = useState(5);
   const [longRestTime, setLongRestTime] = useState(15);
   const [cycles, setCycles] = useState(4);
+  const [working, setWorking] = useState(true);
 
   return (
     <div className="container">
@@ -23,6 +24,7 @@ function App(): JSX.Element {
           setLongRestTime={setLongRestTime}
           cycles={cycles}
           setCycles={setCycles}
+          working={working}
         />
 
         <PomodoroTimer
@@ -30,6 +32,8 @@ function App(): JSX.Element {
           shortRestTime={shortRestTime}
           longRestTime={longRestTime}
           cycles={cycles}
+          working={working}
+          setWorking={setWorking}
         />
       </div>
     </div>

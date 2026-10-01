@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, type JSX } from 'react';
+import { useLayoutEffect, useState, useCallback, type JSX } from 'react';
 import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
 import { Timer } from './timer';
@@ -30,31 +30,41 @@ interface Props {
   shortRestTime: number;
   longRestTime: number;
   cycles: number;
+  working: boolean;
+  setWorking: (value: boolean) => void;
 }
 
 export function PomodoroTimer(props: Props): JSX.Element {
-  const [mainTime, setMainTime] = useState(props.pomodoroTime * 60);
+  const {
+    pomodoroTime,
+    shortRestTime,
+    longRestTime,
+    cycles,
+    working,
+    setWorking,
+  } = props;
+
+  const [mainTime, setMainTime] = useState(pomodoroTime * 60);
   const [timeCounting, setTimeCouting] = useState(false);
-  const [working, setWorking] = useState(true);
   const [resting, setResting] = useState(false);
   const [started, setStarted] = useState(false);
   const [cyclesQtdManager, setCyclesQtdManager] = useState(
-    new Array(props.cycles - 1).fill(true)
+    new Array(cycles - 1).fill(true)
   );
 
   const [completedCycles, setCompletedCycles] = useState(0);
   const [fullWorkingTime, setFullWorkingTime] = useState(0);
   const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
-  const displayedTime = !started ? props.pomodoroTime * 60 : mainTime;
+  const displayedTime = !started ? pomodoroTime * 60 : mainTime;
 
   const configureWork = useCallback(() => {
     setTimeCouting(true);
     setWorking(true);
     setResting(false);
-    setMainTime(props.pomodoroTime * 60);
+    setMainTime(pomodoroTime * 60);
     playAudioForDuration(5800);
-  }, [props.pomodoroTime]);
+  }, [pomodoroTime, setWorking]);
 
   const configureRest = useCallback(
     (Long: boolean) => {
@@ -63,17 +73,17 @@ export function PomodoroTimer(props: Props): JSX.Element {
       setResting(true);
 
       if (Long) {
-        setMainTime(props.longRestTime * 60);
+        setMainTime(longRestTime * 60);
       } else {
-        setMainTime(props.shortRestTime * 60);
+        setMainTime(shortRestTime * 60);
       }
 
       playAudioForDuration(5800);
     },
-    [props.longRestTime, props.shortRestTime]
+    [longRestTime, shortRestTime, setWorking]
   );
   // Efeito restrio somente à manipulação do DOM
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (working) document.body.classList.add('working');
     if (resting) document.body.classList.remove('working');
   }, [working, resting]);
@@ -102,7 +112,7 @@ export function PomodoroTimer(props: Props): JSX.Element {
           'Está na hora de fazer um descanso longo!'
         );
         configureRest(true);
-        setCyclesQtdManager(new Array(props.cycles - 1).fill(true));
+        setCyclesQtdManager(new Array(cycles - 1).fill(true));
         setCompletedCycles((prev) => prev + 1);
         setNumberOfPomodoros((prev) => prev + 1);
       } else if (resting) {

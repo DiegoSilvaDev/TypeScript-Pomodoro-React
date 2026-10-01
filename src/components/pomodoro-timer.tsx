@@ -1,11 +1,18 @@
-import { useLayoutEffect, useState, useCallback, type JSX } from 'react';
+import {
+  useLayoutEffect,
+  useState,
+  useCallback,
+  type JSX,
+  type Dispatch,
+  type SetStateAction,
+} from 'react';
 import { useInterval } from '../hooks/use-interval';
 import { Button } from './button';
 import { Timer } from './timer';
+import { Statistics } from './statistics';
 import { showBrowserNotification } from '../utils/show-browser-notification';
 import { requestNotificationPermission } from '../utils/request-permission';
 import Sound from '../sounds/audio.mp3';
-import { secondsToTime } from '../utils/seconds-to-time';
 
 const audio = new Audio(Sound);
 
@@ -32,6 +39,13 @@ interface Props {
   cycles: number;
   working: boolean;
   setWorking: (value: boolean) => void;
+  fullWorkingTime: number;
+  setFullWorkingTime: Dispatch<SetStateAction<number>>;
+  numberOfPomodoros: number;
+  setNumberOfPomodoros: Dispatch<SetStateAction<number>>;
+  completedCycles: number;
+  setCompletedCycles: Dispatch<SetStateAction<number>>;
+  resetStatistics: () => void;
 }
 
 export function PomodoroTimer(props: Props): JSX.Element {
@@ -42,6 +56,13 @@ export function PomodoroTimer(props: Props): JSX.Element {
     cycles,
     working,
     setWorking,
+    fullWorkingTime,
+    setFullWorkingTime,
+    numberOfPomodoros,
+    setNumberOfPomodoros,
+    completedCycles,
+    setCompletedCycles,
+    resetStatistics,
   } = props;
 
   const [mainTime, setMainTime] = useState(pomodoroTime * 60);
@@ -51,10 +72,6 @@ export function PomodoroTimer(props: Props): JSX.Element {
   const [cyclesQtdManager, setCyclesQtdManager] = useState(
     new Array(cycles - 1).fill(true)
   );
-
-  const [completedCycles, setCompletedCycles] = useState(0);
-  const [fullWorkingTime, setFullWorkingTime] = useState(0);
-  const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
   const displayedTime = !started ? pomodoroTime * 60 : mainTime;
 
@@ -93,8 +110,8 @@ export function PomodoroTimer(props: Props): JSX.Element {
     () => {
       // Se o tempo ainda for maior que zero, apenas subtrai 1
       if (mainTime > 0) {
-        setMainTime(mainTime - 1);
-        if (working) setFullWorkingTime(fullWorkingTime + 1);
+        setMainTime((prev) => prev - 1);
+        if (working) setFullWorkingTime((prev) => prev + 1);
         return;
       }
       // Quando o relogio chega a 0, trata-se a transição diretamente aqui:
@@ -152,11 +169,12 @@ export function PomodoroTimer(props: Props): JSX.Element {
           </>
         )}
       </div>
-      <div className="details">
-        <p>Horas trabalhadas: {secondsToTime(fullWorkingTime)}</p>
-        <p>Ciclos concluídos: {completedCycles}</p>
-        <p>Pomodoros concluídos: {numberOfPomodoros}</p>
-      </div>
+      <Statistics
+        fullWorkingTime={fullWorkingTime}
+        completedCycles={completedCycles}
+        numberOfPomodoros={numberOfPomodoros}
+        resetStatistics={resetStatistics}
+      />
     </div>
   );
 }

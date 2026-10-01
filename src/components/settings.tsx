@@ -1,7 +1,10 @@
-import { useRef, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { SettingsInput } from './settings-input';
 import { FiSettings, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { ToastMessage, type ToastType } from './toast-message';
+import { confirmInput } from '../utils/confirm-input';
+import type { Setting } from '../types/setting';
 
 interface Props {
   pomodoroTime: number;
@@ -12,36 +15,6 @@ interface Props {
   setLongRestTime: (value: number) => void;
   cycles: number;
   setCycles: (value: number) => void;
-}
-
-interface ToastMessageProps {
-  icon: string;
-  title: string;
-  message: string;
-}
-
-type ToastType =
-  | 'toast-pomodoro'
-  | 'toast-short-rest'
-  | 'toast-long-rest'
-  | 'toast-cycles'
-  | 'toast-settings';
-
-function ToastMessage({
-  icon,
-  title,
-  message,
-}: ToastMessageProps): JSX.Element {
-  return (
-    <div className="toast-message">
-      <span className="toast-message-icon">{icon}</span>
-
-      <div className="toast-message-content">
-        <strong>{title}</strong>
-        <span>{message}</span>
-      </div>
-    </div>
-  );
 }
 
 export function Settings(props: Props): JSX.Element {
@@ -56,7 +29,34 @@ export function Settings(props: Props): JSX.Element {
   );
   const [cyclesInput, setCyclesInput] = useState(String(props.cycles));
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const confirmedByEnter = useRef(false);
+
+  const pomodoroSetting: Setting = {
+    value: pomodoroInput,
+    min: 1,
+    max: 120,
+    setValue: setPomodoroInput,
+  };
+
+  const shortRestSetting: Setting = {
+    value: shortRestInput,
+    min: 1,
+    max: 60,
+    setValue: setShortRestInput,
+  };
+
+  const longRestSetting: Setting = {
+    value: longRestInput,
+    min: 1,
+    max: 60,
+    setValue: setLongRestInput,
+  };
+
+  const cyclesSetting: Setting = {
+    value: cyclesInput,
+    min: 1,
+    max: 20,
+    setValue: setCyclesInput,
+  };
 
   function showUpdateToast(
     icon: string,
@@ -73,46 +73,27 @@ export function Settings(props: Props): JSX.Element {
     );
   }
 
-  function confirmValue(
-    input: string,
-    min: number,
-    max: number
-  ): number | null {
-    const value = Number(input);
-
-    if (Number.isNaN(value)) {
-      return null;
-    }
-
-    if (value >= min && value <= max) {
-      return value;
-    }
-
-    return null;
+  function confirmSettings(setting: Setting): number | null {
+    return confirmInput(
+      setting.value,
+      setting.min,
+      setting.max,
+      setting.setValue
+    );
   }
-  function confirmInput(
-    input: string,
-    min: number,
-    max: number,
-    setInput: (value: string) => void,
-    currentValue: number
-  ): number | null {
-    const confirmed = confirmValue(input, min, max);
 
-    if (confirmed !== null) {
-      setInput(String(confirmed));
-      return confirmed;
-    }
-
-    setInput(String(currentValue));
-    return null;
+  function resetSettingsInput(): void {
+    setPomodoroInput(String(props.pomodoroTime));
+    setShortRestInput(String(props.shortRestTime));
+    setLongRestInput(String(props.longRestTime));
+    setCyclesInput(String(props.cycles));
   }
 
   function applySettings(): void {
-    const pomodoro = confirmPomodoroTime();
-    const shortRest = confirmShortRestTime();
-    const longRest = confirmLongRestTime();
-    const cycles = confirmCycles();
+    const pomodoro = confirmSettings(pomodoroSetting);
+    const shortRest = confirmSettings(shortRestSetting);
+    const longRest = confirmSettings(longRestSetting);
+    const cycles = confirmSettings(cyclesSetting);
 
     if (
       pomodoro === null ||
@@ -211,40 +192,6 @@ export function Settings(props: Props): JSX.Element {
     setIsSettingsOpen(false);
   }
 
-  function confirmPomodoroTime(): number | null {
-    return confirmInput(
-      pomodoroInput,
-      1,
-      120,
-      setPomodoroInput,
-      props.pomodoroTime
-    );
-  }
-
-  function confirmShortRestTime(): number | null {
-    return confirmInput(
-      shortRestInput,
-      1,
-      60,
-      setShortRestInput,
-      props.shortRestTime
-    );
-  }
-
-  function confirmLongRestTime(): number | null {
-    return confirmInput(
-      longRestInput,
-      1,
-      60,
-      setLongRestInput,
-      props.longRestTime
-    );
-  }
-
-  function confirmCycles(): number | null {
-    return confirmInput(cyclesInput, 1, 20, setCyclesInput, props.cycles);
-  }
-
   return (
     <>
       {!isSettingsOpen && (
@@ -263,7 +210,10 @@ export function Settings(props: Props): JSX.Element {
             <button
               className="settings-close"
               type="button"
-              onClick={() => setIsSettingsOpen(false)}
+              onClick={() => {
+                resetSettingsInput();
+                setIsSettingsOpen(false);
+              }}
             >
               <FiX size={22} />
             </button>
@@ -271,86 +221,23 @@ export function Settings(props: Props): JSX.Element {
             <div className="settings-fields">
               <SettingsInput
                 label="Tempo de trabalho: "
-                value={pomodoroInput}
-                min={1}
-                max={120}
-                onChange={(e) => setPomodoroInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    confirmedByEnter.current = true;
-                    confirmPomodoroTime();
-                  }
-                }}
-                onBlur={() => {
-                  if (confirmedByEnter.current) {
-                    confirmedByEnter.current = false;
-                    return;
-                  }
-
-                  confirmPomodoroTime();
-                }}
+                setting={pomodoroSetting}
+                onConfirm={confirmSettings}
               />
               <SettingsInput
                 label="Descanso curto: "
-                value={shortRestInput}
-                min={1}
-                max={60}
-                onChange={(e) => setShortRestInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    confirmedByEnter.current = true;
-                    confirmShortRestTime();
-                  }
-                }}
-                onBlur={() => {
-                  if (confirmedByEnter.current) {
-                    confirmedByEnter.current = false;
-                    return;
-                  }
-
-                  confirmShortRestTime();
-                }}
+                setting={shortRestSetting}
+                onConfirm={confirmSettings}
               />
               <SettingsInput
                 label="Descanso longo: "
-                value={longRestInput}
-                min={1}
-                max={60}
-                onChange={(e) => setLongRestInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    confirmedByEnter.current = true;
-                    confirmLongRestTime();
-                  }
-                }}
-                onBlur={() => {
-                  if (confirmedByEnter.current) {
-                    confirmedByEnter.current = false;
-                    return;
-                  }
-                  confirmLongRestTime();
-                }}
+                setting={longRestSetting}
+                onConfirm={confirmSettings}
               />
               <SettingsInput
                 label="Ciclos: "
-                value={cyclesInput}
-                min={1}
-                max={20}
-                onChange={(e) => setCyclesInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    confirmedByEnter.current = true;
-                    confirmCycles();
-                  }
-                }}
-                onBlur={() => {
-                  if (confirmedByEnter.current) {
-                    confirmedByEnter.current = false;
-                    return;
-                  }
-
-                  confirmCycles();
-                }}
+                setting={cyclesSetting}
+                onConfirm={confirmSettings}
               />
             </div>
             <button

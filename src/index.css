@@ -111,6 +111,7 @@ body {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 16px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .settings-input-label {
@@ -227,6 +228,31 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: background-color 300ms ease-in-out;
+}
+
+.settings-input-error-container {
+  height: 18px;
+  margin-top: 2px;
+}
+
+.settings-input-error {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  line-height: 14px;
+  color: #ef5d50;
+}
+
+.settings-input-error svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+.settings-input-field.input-error {
+  border-color: #ef5d50;
+  box-shadow: 0 0 0 2px rgb(239 93 80 / 10%);
 }
 
 .settings-apply:hover {

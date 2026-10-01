@@ -43,6 +43,9 @@ export function PomodoroTimer(props: Props): JSX.Element {
   const [fullWorkingTime, setFullWorkingTime] = useState(0);
   const [numberOfPomodoros, setNumberOfPomodoros] = useState(0);
 
+  const displayedTime =
+    !working && !resting ? props.pomodoroTime * 60 : mainTime;
+
   const configureWork = useCallback(() => {
     setTimeCouting(true);
     setWorking(true);
@@ -102,7 +105,7 @@ export function PomodoroTimer(props: Props): JSX.Element {
   return (
     <div className="pomodoro">
       <h2>You are: {working ? 'Working' : 'Resting'}</h2>
-      <Timer mainTime={mainTime} />
+      <Timer mainTime={displayedTime} />
       <div className="controls">
         <Button text="Work" onClick={() => configureWork()}></Button>
         <Button text="Rest" onClick={() => configureRest(false)}></Button>

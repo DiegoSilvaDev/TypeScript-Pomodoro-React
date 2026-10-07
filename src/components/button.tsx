@@ -10,6 +10,7 @@ interface Props {
 const buttonAudio = new Audio(ButtonSound);
 
 function playButtonSound(): void {
+  buttonAudio.volume = 0.4;
   buttonAudio.currentTime = 0.3;
   buttonAudio.play().catch(() => {});
 }

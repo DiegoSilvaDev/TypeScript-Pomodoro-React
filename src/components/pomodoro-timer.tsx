@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useLayoutEffect,
   useState,
   useCallback,
@@ -13,7 +14,8 @@ import { Statistics } from './statistics';
 import { showBrowserNotification } from '../utils/show-browser-notification';
 import { requestNotificationPermission } from '../utils/request-permission';
 import Sound from '../sounds/audio.mp3';
-
+import { secondsToMinutes } from '../utils/seconds-to-minutes';
+import { setFavicon } from '../utils/set-favicon';
 const audio = new Audio(Sound);
 
 let audioTimeout: number | undefined;
@@ -99,11 +101,22 @@ export function PomodoroTimer(props: Props): JSX.Element {
     },
     [longRestTime, shortRestTime, setWorking]
   );
-  // Efeito restrio somente à manipulação do DOM
+
+  useEffect(() => {
+    const formattedTime = secondsToMinutes(mainTime)
+      .replace('m', ':')
+      .replace('s', ':');
+
+    const status = working ? 'Working' : 'Resting';
+    document.title = `${formattedTime} - ${status}`;
+
+    setFavicon(working ? '/favicon-tomato.svg' : '/favicon-coffee.svg');
+  }, [mainTime, working]);
+
+  // Efeito restrito somente à manipulação do DOM
   useLayoutEffect(() => {
-    if (working) document.body.classList.add('working');
-    if (resting) document.body.classList.remove('working');
-  }, [working, resting]);
+    document.body.classList.toggle('working', working);
+  }, [working]);
 
   // Lógica de contagem e transição de ciclos centralizada no intervalo
   useInterval(

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Tomato favicon</title>
+  <circle cx="32" cy="36" r="22" fill="#ef5d50"/>
+  <path d="M32 17c-4-7-12-8-16-5 6 1 9 4 10 8-5-3-10-2-13 1 6 0 11 3 14 7 3-4 8-7 14-7-3-3-8-4-13-1 1-4 4-7 10-8-4-3-12-2-16 5z" fill="#2f8f5b"/>
+  <path d="M32 14v7" stroke="#2f8f5b" stroke-width="3" stroke-linecap="round"/>
+</svg>

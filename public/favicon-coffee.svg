@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Coffee favicon</title>
+  <path d="M17 25h31v17c0 8-6 14-14 14H31c-8 0-14-6-14-14V25z" fill="#8b5e3c"/>
+  <path d="M48 29h4c6 0 9 4 9 9s-3 9-9 9h-6v-5h6c2 0 4-2 4-4s-2-4-4-4h-4z" fill="#8b5e3c"/>
+  <path d="M25 18c-2-4 2-5 0-9M33 18c-2-4 2-5 0-9M41 18c-2-4 2-5 0-9" fill="none" stroke="#8b5e3c" stroke-width="3" stroke-linecap="round"/>
+  <path d="M13 58h42" stroke="#5d3f2a" stroke-width="4" stroke-linecap="round"/>
+</svg>
